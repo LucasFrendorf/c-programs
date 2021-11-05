@@ -19,6 +19,9 @@
 #define CHANCE_ROUNDS HOUSE_ROUNDS + 1
 #define YATZY_ROUNDS CHANCE_ROUNDS + 1
 
+/* Dice faces */
+#define DICE_MAX_FACE 6
+#define DICE_MIN_FACE 1
 
 /* Yatzy game rules */
 #define SMALL_STRAIGHT_MIN 1
@@ -30,15 +33,10 @@
 #define YATZY_STRAIGHT_MIN 1
 #define YATZY_STRAIGHT_MAX 6
 
-
 #define CHANCE_DICES 5
 
-
-/* TODO: Use sizeof instead of diceAmount */
-/* TODO: Figure out how malloc works and use it */
-/* #define NUM_TO_TEXT ["one", "two", "three", "four", "five", "six"] */
-
 /* Prototypes */
+void startYatzy();
 void rollDice(int *dice, int amount);
 int getStraight(int *dice, int diceAmount, int minFace, int maxFace);
 int getKind(int *dice, int diceAmount, int kindAmount);
@@ -48,10 +46,24 @@ int getChance(int *dice, int diceAmount);
 void waitForUserInput();
 
 int main(void) {
-    /* TODO: Diceamount must be 5 or higher and input */
-    int diceAmount = 10, game = 0, result;
+    startYatzy();
+
+    return EXIT_SUCCESS;
+}
+
+void startYatzy() {
+    int diceAmount = 5, game = 0, i, result;
     int *dice = (int*) calloc(diceAmount, sizeof(int));
-    int scoreCard[14]; 
+    int scoreCard[14];
+    char text[][16] = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "One pair", "Two pair", "Three of a kind", "Four of a kind", "Small straight", "Big straight", "Full house", "Chance", "Yatzy"};
+    
+    printf("Amount of dices (Min: 5): ");
+    scanf(" %d", &diceAmount);
+
+    if (diceAmount < 5) {
+        printf("Please use 5 dices or more!\n");
+        return;
+    }
 
     /* Set the rand seed to time */
     srand(time(NULL));
@@ -59,25 +71,15 @@ int main(void) {
     printf(" Welcome to Yatzy\n");
     printf(" Press (Enter) everytime you wanna progress in the game!\n");
 
-    /* TODO Uncomment when finnished */
-    /* waitForUserInput(); */
+    waitForUserInput();
 
-    for (game = 8; game < 15; game++)
+    for (game = 0; game < 15; game++)
     {
-        printf(" Rolling dice for game: %d\n", game);
+        printf(" %s\n", text[game]);
 
         rollDice(dice, diceAmount);
 
-        /* int i;
-        for (i = 0; i <= 5; i++)
-        {
-            printf(" %d: %d\n", i+1, dice[i]);
-        }
-        
-        printf("\n"); */
-
         if (game < SINGLES_ROUNDS) {
-            /* printf("%d\n", game); */
             result = dice[game];
 
             printf(" You got %d, %d's\n", result, game+1);
@@ -90,26 +92,19 @@ int main(void) {
                 scoreCard[game] = 0;
             }
         } else if (game < PAIR_ROUNDS) {
-            printf(" Pairs round\n");
             scoreCard[game] = getPairs(dice, diceAmount, game - PAIR_ROUNDS);
         } else if (game < IDENTICAL_ROUNDS) {
-            printf(" Identical round %d\n", game);
             scoreCard[game] = getKind(dice, diceAmount, game - IDENTICAL_ROUNDS - 3);
-
         } else if (game < SMALL_STRAIGHT_ROUNDS) {
             if (getStraight(dice, diceAmount, SMALL_STRAIGHT_MIN, SMALL_STRAIGHT_MAX)) {
-                printf(" You got a small straight!\n");
                 scoreCard[game] = 15;
             } else {
-                printf(" You didn't get a small straight!\n");
                 scoreCard[game] = 0;
             }
         } else if (game < BIG_STRAIGHT_ROUNDS) {
             if (getStraight(dice, diceAmount, 2, 6)) {
-                printf(" You got a big straight!\n");
                 scoreCard[game] = 20;
             } else {
-                printf(" You didn't get a big straight!\n");
                 scoreCard[game] = 0;
             }
         } else if (game < HOUSE_ROUNDS) {
@@ -118,14 +113,10 @@ int main(void) {
             scoreCard[game] = getChance(dice, diceAmount);
         } else if (game < YATZY_ROUNDS) {
             if (getStraight(dice, diceAmount, YATZY_STRAIGHT_MIN, YATZY_STRAIGHT_MAX)) {
-                printf(" You got yatzy!\n");
-                scoreCard[game] = 15;
+                scoreCard[game] = 50;
             } else {
-                printf(" You didn't get yatzy!\n");
                 scoreCard[game] = 0;
             }
-        } else {
-            scoreCard[game] = 0;
         }
 
 
@@ -134,11 +125,15 @@ int main(void) {
         waitForUserInput();
     }
 
-    printf("test\n");
+    for (i = 0; i < 14; i++)
+    {
+        printf(" Got %d point(s) for game %s\n", scoreCard[i], text[i]);
+    }
 
-    printf(" Exiting!\n");
+    printf(" Press (Enter) to start a new game\n");
+    waitForUserInput();
 
-    return EXIT_SUCCESS;
+    startYatzy();
 }
 
 void rollDice(int *dice, int diceAmount) {
@@ -153,7 +148,7 @@ void rollDice(int *dice, int diceAmount) {
     
     for (i = 0; i < diceAmount; i++)
     {
-        roll = rand()%6 + 1;
+        roll = rand()%DICE_MAX_FACE + 1;
         dice[roll-1] += 1;
         printf(" %d", roll);
     }
@@ -165,8 +160,7 @@ void rollDice(int *dice, int diceAmount) {
 int getKind(int *dice, int diceAmount, int kindAmount) {
     int i;
 
-    for (i = 6; i > 0; i--)
-    {
+    for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
         if (dice[i-1] >= kindAmount) {
 
             return i * kindAmount;
@@ -191,19 +185,14 @@ int getStraight(int *dice, int diceAmount, int minFace, int maxFace) {
 }
 
 int getPairs(int *dice, int diceAmount, int pairsAmount) {
-    /* TODO: define values here */
     int i, result = 0;
  
     /* Go from the highest dice face and find if there is 2 or more of them */
-    while (pairsAmount > 0)
-    {
-        for (i = 6; i >= 1; i--)
-        {
+    while (pairsAmount > 0) {
+        for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
             if (dice[i-1] >= 2) {
                 result += i * 2;
                 dice[i-1] -= 2;
-
-                printf("%d\n", i*2);
 
                 pairsAmount--;
 
@@ -214,18 +203,16 @@ int getPairs(int *dice, int diceAmount, int pairsAmount) {
         pairsAmount--;
     }
 
-    printf(" result: %d\n", result);
-
     return result;
 }
 
 int getHouse(int *dice, int diceAmount) {
     int i, result = 0;
 
-    for (i = 5; i >= 0; i--) {
-        if (dice[i] >= 3) {
-            result += (i+1) * 3;
-            dice[i] -= 3;
+    for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
+        if (dice[i-1] >= 3) {
+            result += i * 3;
+            dice[i-1] -= 3;
 
             break;
         }
@@ -234,9 +221,9 @@ int getHouse(int *dice, int diceAmount) {
     if (result < 1)
         return 0;
 
-    for (i = 5; i >= 0; i--) {
-        if (dice[i] >= 2) {
-            result += (i+1) * 2;
+    for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
+        if (dice[i-1] >= 2) {
+            result += i * 2;
 
             return result;
         }
@@ -248,12 +235,10 @@ int getHouse(int *dice, int diceAmount) {
 int getChance(int *dice, int diceAmount) {
     int i, d, count = 0, result = 0;
 
-    for (i = 5; i >= 0; i--)
-    {
-        if (dice[i] > 0) {
-            for (d = 0; d < dice[i]; d++)
-            {
-                result += i+1;
+    for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
+        if (dice[i-1] > 0) {
+            for (d = 0; d < dice[i-1]; d++) {
+                result += i;
                 count++;
 
                 if (count > 4) {
