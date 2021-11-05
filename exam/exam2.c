@@ -1,11 +1,11 @@
 /* Name: Lucas Mørk Frendorf */
 /* Group: B201 */
-
-/* Ran using: gcc exam2other.c -ansi -Wall -pedantic && ./a.out && rm a.out */
+/* Ran using: gcc exam2.c -ansi -Wall -pedantic && ./a.out && rm a.out */
 /* Ran on: Linux [x86_64] */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 /* Symbolic constants */
 #define MAX_ROUNDS 3
@@ -24,14 +24,17 @@
 #define DICE_MIN_FACE 1
 
 /* Yatzy game rules */
+#define SMALL_STRAIGHT_POINTS 15
 #define SMALL_STRAIGHT_MIN 1
 #define SMALL_STRAIGHT_MAX 5
 
+#define BIG_STRAIGHT_POINTS 20
 #define BIG_STRAIGHT_MIN 2
 #define BIG_STRAIGHT_MAX 6
 
-#define YATZY_STRAIGHT_MIN 1
-#define YATZY_STRAIGHT_MAX 6
+#define YATZY_POINTS 50
+#define YATZY_MIN 1
+#define YATZY_MAX 6
 
 #define CHANCE_DICES 5
 
@@ -52,12 +55,13 @@ int main(void) {
 }
 
 void startYatzy() {
-    int diceAmount = 5, game = 0, i, result;
+    int diceAmount = 0, game = 0, bonus = 0, total = 0, i, len;
     int *dice = (int*) calloc(diceAmount, sizeof(int));
     int scoreCard[14];
     char text[][16] = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "One pair", "Two pair", "Three of a kind", "Four of a kind", "Small straight", "Big straight", "Full house", "Chance", "Yatzy"};
     
-    printf("Amount of dices (Min: 5): ");
+
+    printf(" Amount of dice (Min: 5): ");
     scanf(" %d", &diceAmount);
 
     if (diceAmount < 5) {
@@ -65,45 +69,42 @@ void startYatzy() {
         return;
     }
 
+    printf("\n");
+
     /* Set the rand seed to time */
     srand(time(NULL));
+
+    waitForUserInput();
 
     printf(" Welcome to Yatzy\n");
     printf(" Press (Enter) everytime you wanna progress in the game!\n");
 
     waitForUserInput();
 
-    for (game = 0; game < 15; game++)
+    for (game = 0; game < YATZY_ROUNDS; game++)
     {
         printf(" %s\n", text[game]);
 
         rollDice(dice, diceAmount);
 
         if (game < SINGLES_ROUNDS) {
-            result = dice[game];
+            printf(" You got %d, %d's\n", dice[game], game+1);
 
-            printf(" You got %d, %d's\n", result, game+1);
-
-            /* Rules says to only get points if there is more than 3 of the same */
-            if (result >= SINGELS_MIN_DICES) {
-                /* Rules says to multiply sum with amount different from normal yatze rules */
-                scoreCard[game] = result * (game+1);
-            } else {
-                scoreCard[game] = 0;
-            }
+            scoreCard[game] = dice[game] * (game+1);
+            bonus += scoreCard[game];
         } else if (game < PAIR_ROUNDS) {
-            scoreCard[game] = getPairs(dice, diceAmount, game - PAIR_ROUNDS);
+            scoreCard[game] = getPairs(dice, diceAmount, game - 1 - PAIR_ROUNDS);
         } else if (game < IDENTICAL_ROUNDS) {
             scoreCard[game] = getKind(dice, diceAmount, game - IDENTICAL_ROUNDS - 3);
         } else if (game < SMALL_STRAIGHT_ROUNDS) {
             if (getStraight(dice, diceAmount, SMALL_STRAIGHT_MIN, SMALL_STRAIGHT_MAX)) {
-                scoreCard[game] = 15;
+                scoreCard[game] = SMALL_STRAIGHT_POINTS;
             } else {
                 scoreCard[game] = 0;
             }
         } else if (game < BIG_STRAIGHT_ROUNDS) {
-            if (getStraight(dice, diceAmount, 2, 6)) {
-                scoreCard[game] = 20;
+            if (getStraight(dice, diceAmount, BIG_STRAIGHT_MIN, BIG_STRAIGHT_MAX)) {
+                scoreCard[game] = BIG_STRAIGHT_POINTS;
             } else {
                 scoreCard[game] = 0;
             }
@@ -112,23 +113,39 @@ void startYatzy() {
         } else if (game < CHANCE_ROUNDS) {
             scoreCard[game] = getChance(dice, diceAmount);
         } else if (game < YATZY_ROUNDS) {
-            if (getStraight(dice, diceAmount, YATZY_STRAIGHT_MIN, YATZY_STRAIGHT_MAX)) {
-                scoreCard[game] = 50;
+            if (getStraight(dice, diceAmount, YATZY_MIN, YATZY_MAX)) {
+                scoreCard[game] = YATZY_POINTS;
             } else {
                 scoreCard[game] = 0;
             }
         }
-
 
         printf(" Points this round: %d\n", scoreCard[game]);
 
         waitForUserInput();
     }
 
-    for (i = 0; i < 14; i++)
+    for (i = 0; i < YATZY_ROUNDS; i++)
     {
-        printf(" Got %d point(s) for game %s\n", scoreCard[i], text[i]);
+        len = 20-strlen(text[i]);
+        printf("%*s %s | %d\n", len, "", text[i], scoreCard[i]);
+
+        total += scoreCard[i];
+
+        if (i == SINGLES_ROUNDS-1) {
+            if (bonus < 63) {
+                bonus = 0;
+            }
+
+            scoreCard[i] += bonus;
+
+            len = 20-strlen("Bonus");
+            printf("%*s Bonus | %d \n", len, "", bonus);
+        }
     }
+
+    len = 20-strlen("Total");
+    printf("%*s Total | %d\n", len, "", total);
 
     printf(" Press (Enter) to start a new game\n");
     waitForUserInput();
@@ -139,9 +156,9 @@ void startYatzy() {
 void rollDice(int *dice, int diceAmount) {
     int i, roll;
 
-    printf(" You rolled:");
+    printf(" Rolled:");
 
-    for (i = 0; i < diceAmount; i++)
+    for (i = 0; i <= diceAmount; i++)
     {
         dice[i] = 0;
     }
@@ -162,10 +179,12 @@ int getKind(int *dice, int diceAmount, int kindAmount) {
 
     for (i = DICE_MAX_FACE; i >= DICE_MIN_FACE; i--) {
         if (dice[i-1] >= kindAmount) {
-
+            printf(" Found %d of a kind in %d's\n", kindAmount, i);
             return i * kindAmount;
         }
     }
+
+    printf(" Didn't find %d of a kind\n", kindAmount);
 
     return 0;
 }
@@ -194,13 +213,23 @@ int getPairs(int *dice, int diceAmount, int pairsAmount) {
                 result += i * 2;
                 dice[i-1] -= 2;
 
+                printf(" Found a pair of %d's\n", i);
+
                 pairsAmount--;
 
-                break;
+                if (pairsAmount <= 0) {
+                    break;
+                }
             }
         }
 
-        pairsAmount--;
+        if (pairsAmount == 1) {
+            printf(" Didn't find last pair\n");
+            result = 0;
+            break;
+        } else {
+            pairsAmount--;
+        }
     }
 
     return result;
