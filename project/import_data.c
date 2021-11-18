@@ -8,21 +8,21 @@
 /* Symbolic constants */
 struct assignmentData {
     int date;
-    int class;
     int time;
+    char class[50];
 };
 
 /* Prototypes */
 
 int main(void) {
-    int i;
+    int i, found;
     FILE* my_file = fopen("exampledata.csv", "r");
     struct assignmentData array[100];
 
     for (i = 0; i < sizeof(array)/sizeof(array[0]); ++i)
     {
-        int got = fscanf(my_file, "%d,%d,%d", &array[i].date, &array[i].class, &array[i].time);
-        if (got != 3) break;
+        int found = fscanf(my_file, "%d,%d,%s", &array[i].date, &array[i].time, array[i].class);
+        if (found != 3) break;
     }
     fclose(my_file);
 
@@ -30,7 +30,7 @@ int main(void) {
     /* TODO get length of array */
     for (i = 0; i < 3; ++i)
     {
-        printf("%d | %d | %d\n", array[i].date, array[i].class, array[i].time);
+        printf("%d | %d | %s\n", array[i].date, array[i].time, array[i].class);
     }
     
     return EXIT_SUCCESS;
