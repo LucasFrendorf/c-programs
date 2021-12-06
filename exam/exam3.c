@@ -93,9 +93,10 @@ int main(void) {
     }
 
     printf("---- Unsorted ----\n");
+    printf(" Team | Score | Goals | Goal on team\n");
     for (i = 0; i < TEAMS; i++)
     {
-        printf("Team: %3.3s Points: %d Goals: %d Goals on team: %d\n", Teams[i].teamName, Teams[i].points, Teams[i].goalsByTeam, Teams[i].goalsOnTeam);
+        printf("%5s | %5d | %5d | %5d\n", Teams[i].teamName, Teams[i].points, Teams[i].goalsByTeam, Teams[i].goalsOnTeam);
     }
 
     printf("\n");
@@ -103,9 +104,10 @@ int main(void) {
     qsort(Teams, TEAMS, sizeof(team), compareMatch);
     
     printf("---- Sorted ----\n");
+    printf(" Team | Score | Goals | Goal on team\n");
     for (i = 0; i < TEAMS; i++)
     {
-        printf("Team: %3.3s Points: %d Goals: %d Goals on team: %d\n", Teams[i].teamName, Teams[i].points, Teams[i].goalsByTeam, Teams[i].goalsOnTeam);
+        printf("%5s | %5d | %5d | %5d\n", Teams[i].teamName, Teams[i].points, Teams[i].goalsByTeam, Teams[i].goalsOnTeam);
     }
 
     fclose(fp); 
