@@ -71,7 +71,7 @@ int main(void) {
 
     for (i = 0; i < lines; i++)
     {
-        fscanf(fp, "%s     %s %s     %s - %s     %i - %i     %i", Games[i].day, Games[i].date, Games[i].clock, Games[i].team1Name, Games[i].team2Name, &Games[i].team1Score, &Games[i].team2Score, &Games[i].spectators);
+        fscanf(fp, "%s %s %s %s - %s %i - %i %i", Games[i].day, Games[i].date, Games[i].clock, Games[i].team1Name, Games[i].team2Name, &Games[i].team1Score, &Games[i].team2Score, &Games[i].spectators);
 
         strcpy(Teams[teamNumber(Games[i].team1Name)].teamName, Games[i].team1Name);
         strcpy(Teams[teamNumber(Games[i].team2Name)].teamName, Games[i].team2Name);
