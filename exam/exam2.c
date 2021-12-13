@@ -11,13 +11,14 @@
 #define MAX_ROUNDS 3
 #define SINGELS_MIN_DICES 3
 #define SINGLES_ROUNDS 6
-#define PAIR_ROUNDS SINGLES_ROUNDS + 2
-#define IDENTICAL_ROUNDS PAIR_ROUNDS + 2
-#define SMALL_STRAIGHT_ROUNDS IDENTICAL_ROUNDS + 1
-#define BIG_STRAIGHT_ROUNDS SMALL_STRAIGHT_ROUNDS + 1
-#define HOUSE_ROUNDS BIG_STRAIGHT_ROUNDS + 1
-#define CHANCE_ROUNDS HOUSE_ROUNDS + 1
-#define YATZY_ROUNDS CHANCE_ROUNDS + 1
+#define BONUS_ROUNDS (SINGLES_ROUNDS + 1)
+#define PAIR_ROUNDS (BONUS_ROUNDS + 2)
+#define IDENTICAL_ROUNDS (PAIR_ROUNDS + 2)
+#define SMALL_STRAIGHT_ROUNDS (IDENTICAL_ROUNDS + 1)
+#define BIG_STRAIGHT_ROUNDS (SMALL_STRAIGHT_ROUNDS + 1)
+#define HOUSE_ROUNDS (BIG_STRAIGHT_ROUNDS + 1)
+#define CHANCE_ROUNDS (HOUSE_ROUNDS + 1)
+#define YATZY_ROUNDS (CHANCE_ROUNDS + 1)
 
 /* Dice faces */
 #define DICE_MAX_FACE 6
@@ -55,12 +56,11 @@ int main(void) {
 }
 
 void startYatzy() {
-    int diceAmount = 0, game = 0, bonus = 0, total = 0, i, len;
+    int diceAmount = 0, game = 0, bonus = 0, total = 0, i;
     int *dice = (int*) calloc(diceAmount, sizeof(int));
     int scoreCard[14];
-    char text[][16] = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "One pair", "Two pair", "Three of a kind", "Four of a kind", "Small straight", "Big straight", "Full house", "Chance", "Yatzy"};
+    char text[][YATZY_ROUNDS] = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Bonus", "One pair", "Two pair", "Three of a kind", "Four of a kind", "Small straight", "Big straight", "Full house", "Chance", "Yatzy"};
     
-
     printf(" Amount of dice (Min: 5): ");
     scanf(" %d", &diceAmount);
 
@@ -83,6 +83,9 @@ void startYatzy() {
 
     for (game = 0; game < YATZY_ROUNDS; game++)
     {
+        if (game == BONUS_ROUNDS)
+            continue;
+
         printf(" %s\n", text[game]);
 
         rollDice(dice, diceAmount);
@@ -91,6 +94,7 @@ void startYatzy() {
             printf(" You got %d, %d's\n", dice[game], game+1);
 
             scoreCard[game] = dice[game] * (game+1);
+            /* Implement bonus into our scorecard */
             bonus += scoreCard[game];
         } else if (game < PAIR_ROUNDS) {
             scoreCard[game] = getPairs(dice, diceAmount, game - 1 - PAIR_ROUNDS);
@@ -113,6 +117,7 @@ void startYatzy() {
         } else if (game < CHANCE_ROUNDS) {
             scoreCard[game] = getChance(dice, diceAmount);
         } else if (game < YATZY_ROUNDS) {
+            /* TODO fix yatzy */
             if (getStraight(dice, diceAmount, YATZY_MIN, YATZY_MAX)) {
                 scoreCard[game] = YATZY_POINTS;
             } else {
@@ -127,8 +132,7 @@ void startYatzy() {
 
     for (i = 0; i < YATZY_ROUNDS; i++)
     {
-        len = 20-strlen(text[i]);
-        printf("%*s %s | %d\n", len, "", text[i], scoreCard[i]);
+        printf("%15s | %d\n", text[i], scoreCard[i]);
 
         total += scoreCard[i];
 
@@ -139,13 +143,11 @@ void startYatzy() {
 
             scoreCard[i] += bonus;
 
-            len = 20-strlen("Bonus");
-            printf("%*s Bonus | %d \n", len, "", bonus);
+            printf("%15s | %d \n", "Bonus", bonus);
         }
     }
 
-    len = 20-strlen("Total");
-    printf("%*s Total | %d\n", len, "", total);
+    printf("%15s | %d\n", "Total", total);
 
     printf(" Press (Enter) to start a new game\n");
     waitForUserInput();

@@ -23,6 +23,15 @@ typedef struct
 
 typedef struct
 {
+    char teamName[4];
+    int points;
+    int goalsByTeam;
+    int goalsOnTeam;
+    struct teamTest *nextTeam;
+} teamTest;
+
+typedef struct
+{
     char day[4];
     char date[6];
     char clock[6];
@@ -38,13 +47,15 @@ typedef struct
 
 /* Prototypes */
 int compareMatch(const void *a, const void *b);
+int hash(unsigned char *str);
 
 int main(void) {
     game *Games;
     team *Teams;
+    teamTest *TeamsHash;
     int i, j, arrSize = ARRAYSTARTSIZE, lines = 0, count = 0, add = 0;
     char team1[4], team2[4];
-
+    int hashNum;
     FILE *fp;
 
     if ((fp = fopen("kampe-2020-2021.txt","r")) == NULL){
@@ -139,7 +150,7 @@ int main(void) {
         }
     }
 
-    printf("---- Unsorted ----\n");
+    /* printf("---- Unsorted ----\n");
     printf(" Team | Score | Goals | Goal on team\n");
     for (i = 0; i < count; i++)
     {
@@ -155,8 +166,22 @@ int main(void) {
     for (i = 0; i < count; i++)
     {
         printf("%5s | %5d | %5d | %5d\n", Teams[i].teamName, Teams[i].points, Teams[i].goalsByTeam, Teams[i].goalsOnTeam);
+    } */
+
+    printf("test\n");
+
+    for (i = 0; i < count; i++)
+    {
+        hashNum = hash(((unsigned char *)Teams[i].teamName));
+
+        printf("Hash of team %s is %d\n", Teams[i].teamName, hashNum);
+
+        /* TeamsHash[hashNum]->teamName = Teams[i].teamName; */#
+        TeamsHash[hashNum].teamName = Teams[i].teamName;
     }
 
+    /* AaB, VB, ACH and FCK overlap on 9 */
+    
     fclose(fp); 
         
     return EXIT_SUCCESS;
@@ -170,4 +195,16 @@ int compareMatch(const void *a, const void *b) {
         return B->points - A->points;
 
     return (B->goalsByTeam - B->goalsOnTeam) - (A->goalsByTeam - A->goalsOnTeam);
+}
+
+/* djb2 hashing funciton */
+int hash(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    /* TODO currently assumes array size is 12 */
+    return hash % 12;
 }
