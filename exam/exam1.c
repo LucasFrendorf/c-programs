@@ -21,7 +21,7 @@
 /* Prototypes */
 void scan_data(char *operator, double *input);
 int is_non_binary(char operator);
-void do_next_op(char *operator, double *input, double *accumulator);
+void do_next_op(char operator, double input, double *accumulator);
 double run_calculator();
 
 int main(void) {
@@ -39,7 +39,7 @@ double run_calculator() {
         printf(" Enter operator, and an optional operand: ");
         scan_data(&operator, &input);
 
-        do_next_op(&operator, &input, &accumulator);
+        do_next_op(operator, input, &accumulator);
 
         if (operator != QUIT) 
             printf(" Result so far is %f\n", accumulator);
@@ -66,29 +66,29 @@ int is_non_binary(char operator) {
     return 0;
 }
 
-void do_next_op(char *operator, double *input, double *accumulator) {
-    switch (*operator) {
+void do_next_op(char operator, double input, double *accumulator) {
+    switch (operator) {
         case ADDITION:
-            *accumulator += *input;
+            *accumulator += input;
             break;
 
         case SUBTRACTION:
-            *accumulator -= *input;
+            *accumulator -= input;
             break;
         
         case MULTIPLICATION:
-            *accumulator *= *input;
+            *accumulator *= input;
             break;
 
         case DIVISION: /* Don't allow doing the squareroot of 0 */
-            if (*input == 0)
+            if (input == 0)
                 break;
 
-            *accumulator /= *input;
+            *accumulator /= input;
             break;
         
         case POWER:
-            *accumulator = pow(*accumulator, *input);
+            *accumulator = pow(*accumulator, input);
             break;
 
         case SQUAREROOT: /* Don't allow using negative number with squareroot */
