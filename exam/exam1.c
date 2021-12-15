@@ -31,9 +31,8 @@ int main(void) {
 }
 
 double run_calculator() {
-    double accumulator = 0.0;
+    double input, accumulator = 0.0;
     char operator;
-    double input;
     
     do {
         printf(" Enter operator, and an optional operand: ");
@@ -51,11 +50,11 @@ double run_calculator() {
 }
 
 void scan_data(char *operator, double *input) {
-    scanf(" %c", &*operator);
+    scanf(" %c", *&operator);
 
     /* Only checks for value if it's need by the operator */
     if (is_non_binary(*operator))
-        scanf(" %lf", &*input);
+        scanf(" %lf", *&input);
 }
 
 int is_non_binary(char operator) {
