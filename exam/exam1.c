@@ -20,19 +20,18 @@
 
 /* Prototypes */
 void scan_data(char *operator, double *input);
-int is_non_binary(char *operator);
-void do_next_op(char *operator, double *input, double **accumulator);
-double run_calculator(double *accumulator);
+int is_non_binary(char operator);
+void do_next_op(char *operator, double *input, double *accumulator);
+double run_calculator();
 
 int main(void) {
-    double accumulator = 0.0;
-
-    run_calculator(&accumulator);
+    run_calculator();
 
     return EXIT_SUCCESS;
 }
 
-double run_calculator(double *accumulator) {
+double run_calculator() {
+    double accumulator = 0.0;
     char operator;
     double input;
     
@@ -43,71 +42,71 @@ double run_calculator(double *accumulator) {
         do_next_op(&operator, &input, &accumulator);
 
         if (operator != QUIT) 
-            printf(" Result so far is %f\n", *accumulator);
+            printf(" Result so far is %f\n", accumulator);
         else
-            printf(" Final result is: %f\n", *accumulator);
+            printf(" Final result is: %f\n", accumulator);
     } while (operator != QUIT);
 
-    return *accumulator;
+    return accumulator;
 }
 
 void scan_data(char *operator, double *input) {
     scanf(" %c", &*operator);
 
     /* Only checks for value if it's need by the operator */
-    if (is_non_binary(operator))
+    if (is_non_binary(*operator))
         scanf(" %lf", &*input);
 }
 
-int is_non_binary(char *operator) {
-    if (*operator != SQUAREROOT && *operator != FLIP && *operator != DIVIDE1 && *operator != QUIT) {
+int is_non_binary(char operator) {
+    if (operator != SQUAREROOT && operator != FLIP && operator != DIVIDE1 && operator != QUIT) {
         return 1;
     }
 
     return 0;
 }
 
-void do_next_op(char *operator, double *input, double **accumulator) {
+void do_next_op(char *operator, double *input, double *accumulator) {
     switch (*operator) {
         case ADDITION:
-            **accumulator += *input;
+            *accumulator += *input;
             break;
 
         case SUBTRACTION:
-            **accumulator -= *input;
+            *accumulator -= *input;
             break;
         
         case MULTIPLICATION:
-            **accumulator *= *input;
+            *accumulator *= *input;
             break;
 
         case DIVISION: /* Don't allow doing the squareroot of 0 */
             if (*input == 0)
                 break;
 
-            **accumulator /= *input;
+            *accumulator /= *input;
             break;
         
         case POWER:
-            **accumulator = pow(**accumulator, *input);
+            *accumulator = pow(*accumulator, *input);
             break;
 
         case SQUAREROOT: /* Don't allow using negative number with squareroot */
-            if (**accumulator < 0)
+            if (*accumulator < 0)
                 break;
 
-            **accumulator = sqrt(**accumulator);
+            *accumulator = sqrt(*accumulator);
             break;
 
         case FLIP:
-            **accumulator = -**accumulator;
+            *accumulator = -*accumulator;
             break;
 
         case DIVIDE1: /* Don't allow dividing by 0 */
-            if (**accumulator == 0)
+            if (*accumulator == 0)
                 break;
 
-            **accumulator = **accumulator/1;
+            *accumulator = *accumulator/1;
             break;
         
         default:
