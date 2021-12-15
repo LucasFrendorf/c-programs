@@ -81,8 +81,7 @@ void do_next_op(char *operator, double *input, double **accumulator) {
             **accumulator *= *input;
             break;
 
-        case DIVISION:
-            /* Don't allow doing the squareroot of 0 */
+        case DIVISION: /* Don't allow doing the squareroot of 0 */
             if (*input == 0)
                 break;
 
@@ -93,8 +92,7 @@ void do_next_op(char *operator, double *input, double **accumulator) {
             **accumulator = pow(**accumulator, *input);
             break;
 
-        case SQUAREROOT:
-            /* Don't allow using negative number with squareroot */
+        case SQUAREROOT: /* Don't allow using negative number with squareroot */
             if (**accumulator < 0)
                 break;
 
@@ -105,8 +103,7 @@ void do_next_op(char *operator, double *input, double **accumulator) {
             **accumulator = -**accumulator;
             break;
 
-        case DIVIDE1:
-            /* Don't allow dividing by 0 */
+        case DIVIDE1: /* Don't allow dividing by 0 */
             if (**accumulator == 0)
                 break;
 
