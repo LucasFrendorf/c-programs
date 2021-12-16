@@ -1,3 +1,5 @@
+/* Name: Lucas Mørk Frendorf */
+/* Group: B201 */
 /* Ran using: gcc exam1.c -ansi -Wall -pedantic -lm && ./a.out && rm a.out */
 /* -lm is due to math.h on linux */
 /* Ran on: Linux [x86_64] */
