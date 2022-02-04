@@ -53,12 +53,12 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
+    Teams = (team *) calloc(arrSize, sizeof(team));
+
     /* Get the amount of games in our files and get teams */
     while(fscanf(fp, "%*s %*s %*s %s - %s %*i - %*i %*i", team1, team2) != EOF)
     {
         if (count == 0) {
-            Teams = (team *) calloc(arrSize, sizeof(team));
-
             strcpy(Teams[count].teamName, team1);
             count++;
         } else {
